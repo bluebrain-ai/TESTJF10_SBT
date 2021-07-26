@@ -14,7 +14,7 @@
 <name>TESTJF10</name>
 <description> </description>
 <properties>
-    <java.version>1.8</java.version>
+    <java.version>16</java.version>
 </properties>
 	<!-- add here the SBT text while creating the POM.file -->
 	
@@ -24,6 +24,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 
 		<dependency>
@@ -35,7 +41,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.10</version>
+			<version>1.18.20</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -103,13 +109,13 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.6.2</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>16</source>
+					<target>16</target>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.10</version>
+							<version>1.18.20</version>
 						</path>
 						<path>
                             <groupId>org.mapstruct</groupId>

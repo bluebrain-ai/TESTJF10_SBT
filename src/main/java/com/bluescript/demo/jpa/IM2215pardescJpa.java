@@ -12,9 +12,10 @@ import org.springframework.data.jpa.repository.QueryHints;
 import com.bluescript.demo.dto.IM2215pardescJpaDto;
 import com.bluescript.demo.entity.PardescEntity;
 
-public interface IM2215pardescJpa extends Repository<PardescEntity, ID> {
+public interface IM2215pardescJpa extends Repository<PardescEntity, String> {
     @QueryHints(value = { @QueryHint(name = org.hibernate.annotations.QueryHints.FETCH_SIZE, value = "100"), // modify
-                                                                                                             // based on
+                                                                                                             // based
+                                                                                                             // on
                                                                                                              // performance
             @QueryHint(name = org.hibernate.annotations.QueryHints.CACHEABLE, value = "false"),
             @QueryHint(name = org.hibernate.annotations.QueryHints.READ_ONLY, value = "true") })

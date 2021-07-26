@@ -16,7 +16,7 @@ import com.bluescript.demo.model.WsCcyymmdd;
 public class WsDateReformatAreas {
     private WsWorkDate wsWorkDate;
     private WsCcyymmdd wsCcyymmdd;
-    private String wsCurrentDate = VALUE;
+    private String wsCurrentDate;// = VALUE;
     private String wsTodayDate;
     private String wsTodayTime;
     private String wsStartDate = "0000-00-00";

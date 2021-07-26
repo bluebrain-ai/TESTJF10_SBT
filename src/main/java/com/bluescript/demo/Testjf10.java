@@ -1,12 +1,16 @@
 package com.bluescript.demo;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +21,13 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import com.bluescript.demo.jpa.Ic1ParkanbJpa;
 import com.bluescript.demo.jpa.Ic2ParkanbJpa;
+import com.bluescript.demo.mapper.ConvStrToObj;
+
 import java.time.LocalDate;
-import java.time.DateTimeFormatter;
+//import java.time.DateTimeFormatter;  -- commented as it comes under format package
+import java.time.format.DateTimeFormatter;
 import java.time.LocalTime;
+
 import com.bluescript.demo.dto.c1ParkanbJpaDto;
 import com.bluescript.demo.dto.Ic1ParkanbJpaDto;
 import com.bluescript.demo.dto.M2212csiplntJpaDto;
@@ -30,7 +38,7 @@ import com.bluescript.demo.dto.IM2215pardescJpaDto;
 import com.bluescript.demo.jpa.IM2215pardescJpa;
 import com.bluescript.demo.dto.c2ParkanbJpaDto;
 import com.bluescript.demo.dto.Ic2ParkanbJpaDto;
-import org.springframework.cloud.stream.function.StreamBridge;
+//import org.springframework.cloud.stream.function.StreamBridge;
 import com.bluescript.demo.model.FileStatusCodes;
 import com.bluescript.demo.model.WsSwitches;
 import com.bluescript.demo.model.WsDateReformatAreas;
@@ -39,7 +47,7 @@ import com.bluescript.demo.model.WsCcyymmdd;
 import com.bluescript.demo.model.HostVariablesPm;
 import com.bluescript.demo.model.V01Rec;
 import com.bluescript.demo.model.V01OwkData;
-import com.bluescript.demo.model.V02Datetime;Import org.springframework.beans.factory.annotation.webClientBuilder;
+import com.bluescript.demo.model.V02Datetime;
 
 @Getter
 @Setter
@@ -83,8 +91,8 @@ public class Testjf10 {
     private IM2215pardescJpa pardescJpa;
     @Autowired
     private c2ParkanbJpaDto c2ParkanbJpaDto;
-    @Autowired
-    private StreamBuilder streamBuilder;
+    // @Autowired
+    // private StreamBuilder streamBuilder;
     private int wsOut01Counter;
     private long wsOut01DisplayCount;
     private String t1SuppCode;
@@ -107,9 +115,13 @@ public class Testjf10 {
     private String v04OwkDateTime;
     @Autowired
     private WebClient.Builder webClientBuilder;
-    @Autowired
-    private WebClient.Builder webClientBuilder;
+    // @Autowired
+    // private WebClient.Builder webClientBuilder;
 
+    @Autowired
+    private ConvStrToObj copyStrToObj;
+
+    @Transactional(readOnly = true)
     public void m0000MainModule() {
         log.debug("Methodm0000MainModulestarted..");
         log.info("OWKB010 START");
@@ -124,54 +136,72 @@ public class Testjf10 {
         log.debug("Method m0000MainModule completed..");
     }
 
- public void m1000Initialization(){
- log.debug("Methodm1000Initializationstarted..");
-wsDateReformatAreas.wsTodayDate = LocalDate.now().format(DateTimeFormatter.ofPattern("YYYYMMDD"));
-       wsCcyymmdd = copyStrToObj.wsTodayDateTowsCcyymmdd_1(wsTodayDate,wsCcyymmdd);
-V02Datetime.setV02ProcessDate(wsDateReformatAreas.getWsTodayDate());wsDateReformatAreas.wsTodayTime = LocalTime.now().toString(); // HH-mm-ss 
+    public void m1000Initialization() {
+        log.debug("Methodm1000Initializationstarted....");
+        wsDateReformatAreas.setWsTodayDate(LocalDate.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"))); // --
+                                                                                                             // Formatter
+                                                                                                             // change
+                                                                                                             // to small
+                                                                                                             // dd
+        wsCcyymmdd = copyStrToObj.wsTodayDateTowsCcyymmdd_1(wsDateReformatAreas.getWsTodayDate(), wsCcyymmdd);
+        v02Datetime.setV02ProcessDate(wsDateReformatAreas.getWsTodayDate());
 
-       V01Rec.v01OwkOrdRelDt=v02Datetime.toFixedWidthString();
-v04OwkDateTime=v02Datetime.toFixedWidthString();
-       V02Datetime.setV02ProcessTime(wsDateReformatAreas.getWsTodayTime());
-      
-       wsWorkDate.setWsWorkDateCcyy(wsCcyymmdd.getWsCcyyDate());
-       wsWorkDate.setWsWorkDateMm(wsCcyymmdd.getWsMmDate());
-       wsWorkDate.setWsWorkDateDd(wsCcyymmdd.getWsDdDate());
-       wsWorkDate.setDash1("-");
+        wsDateReformatAreas.setWsTodayTime(LocalTime.now().toString()); // HH-mm-ss
 
-       wsDateReformatAreas.wsCurrentDate=wsWorkDate.toFixedWidthString();
-      
-       fileStatusCodes.setWsRoutine("BUMPWORK");
-       fileStatusCodes.setWsInputDate(wsDateReformatAreas.getWsCurrentDate());fileStatusCodes.setWsParm2Num(20);fileStatusCodes.setWsParm3("+");fileStatusCodes.setWsParm4("");fileStatusCodes.setWsParm5(""); List subprogram_parms = new Arraylist(fileStatusCodes.getwsRoutine(),fileStatusCodes.getwsInputDate(),fileStatusCodes.getwsParm2Num(),fileStatusCodes.getwsParm3(),fileStatusCodes.getwsParm4(),fileStatusCodes.getwsParm5()); subprogram_parms = webclientBuiler.build().get.uri(fileStatusCodesIsmr121Api).syncBody(subprogram_parms).retrive().bodyToMono(List.class).block();
-       if(fileStatusCodes.wsParm5 == "" )
- { 
- log.info("PROGRAM NAME : OWKB010");
-log.info("FORCED ABEND - CALENDAR ROUTINE ABEND");
-webclientBuiler.build().get.uri(abendmeApi).syncBody().retrive().bodyToMono().block();
- } 
-wsDateReformatAreas.setWsStartDate(fileStatusCodes.getWsParm5());
-       log.info("WS START DATE: " + wsDateReformatAreas.wsStartDate);
+        v01Rec.setV01OwkOrdRelDt(v02Datetime.toFixedWidthString());
+        v04OwkDateTime = v02Datetime.toFixedWidthString();
+        v02Datetime.setV02ProcessTime(wsDateReformatAreas.getWsTodayTime());
 
-      
-       
-              
- 
-  
-log.debug("Method m1000Initialization completed..");
- }
+        wsWorkDate.setWsWorkDateCcyy(wsCcyymmdd.getWsCcyyDate());
+        wsWorkDate.setWsWorkDateMm(wsCcyymmdd.getWsMmDate());
+        wsWorkDate.setWsWorkDateDd(wsCcyymmdd.getWsDdDate());
+        wsWorkDate.setDash1("-");
+        wsWorkDate.setDash2("-"); // Added dash2 to make sure date format correct - Revathi
 
+        wsDateReformatAreas.setWsCurrentDate(wsWorkDate.toFixedWidthString());
+
+        fileStatusCodes.setWsRoutine("BUMPWORK");
+        fileStatusCodes.setWsInputDate(wsDateReformatAreas.getWsCurrentDate());
+        fileStatusCodes.setWsParm2Num(20);
+        fileStatusCodes.setWsParm3("+");
+        fileStatusCodes.setWsParm4("");
+        fileStatusCodes.setWsParm5("");
+
+        List subprogram_parms = Arrays.asList(fileStatusCodes.getWsRoutine(), fileStatusCodes.getWsInputDate(),
+                fileStatusCodes.getWsParm2Num(), fileStatusCodes.getWsParm3(), fileStatusCodes.getWsParm4(),
+                fileStatusCodes.getWsParm5());
+
+        // ubprogram_parms =
+        // webclientBuiler.build().get.uri(fileStatusCodesIsmr121Api).syncBody(subprogram_parms).retrive().bodyToMono(List.class).block();
+
+        fileStatusCodes.setWsParm5("1/1/2020"); // Assuming response from ISMR121API
+        if (fileStatusCodes.getWsParm5() == "") {
+            log.info("PROGRAM NAME : OWKB010");
+            log.info("FORCED ABEND - CALENDAR ROUTINE ABEND");
+            // webClientBuilder.build().get().uri(abendmeApi).syncBody().retrive().bodyToMono().block();
+
+            // Method to DLQ write
+        }
+
+        wsDateReformatAreas.setWsStartDate(fileStatusCodes.getWsParm5());
+        log.info("WS START DATE: " + wsDateReformatAreas.getWsStartDate());
+
+        log.debug("Method m1000Initialization completed..");
+    }
+
+    @Transactional(readOnly = true)
     public void m2000Mainline() {
         log.debug("Methodm2000Mainlinestarted..");
-        V01Rec.setV01OwkBusinessEntity("BK005");
+        v01Rec.setV01OwkBusinessEntity("BK005");
         v04OwkBusEnt = "BK005";
-        V01Rec.setV01OwkOrdRelTypeCode("DO");
+        v01Rec.setV01OwkOrdRelTypeCode("DO");
         v04OwkRelType = "DO";
-        V01Rec.setV01OwkOrdRelStatus("RP");
-        V01Rec.setV01OwkNamcData("");
+        v01Rec.setV01OwkOrdRelStatus("RP");
+        v01Rec.setV01OwkNamcData("");
 
-        m2100OpenC1Parkanb();
+        // m2100OpenC1Parkanb();
 
-        while (wsSwitches.getWsParkanbSwitch().equals(wsSwitches.getWsNoMoreParkanb())) {
+        while (wsSwitches.getWsParkanbSwitch().equals("Y")) { // changed the equals method to intial noPerk -- revathi
             m2200MainProcessLoop();
         }
         ;
@@ -185,81 +215,93 @@ log.debug("Method m1000Initialization completed..");
         log.debug("Method m2000MainlineExit completed..");
     }
 
-  @Transactional(readOnly = true)  
- public void m2200MainProcessLoop(){
- log.debug("Methodm2200MainProcessLoopstarted..");
- try { 
- Stream<Ic1ParkanbJpaDto>  c1parkanbStream = c1parkanbjpa.selectc1Parkanb(wsStartDate,wsCurrentDate);c1parkanbStream.forEach(item -> {
-  
+    @Transactional(readOnly = true)
+    public void m2200MainProcessLoop() {
+        log.debug("Methodm2200MainProcessLoopstarted..");
+        try {
+            Stream<Ic1ParkanbJpaDto> c1parkanbStream = c1ParkanbJpa
+                    .selectc1Parkanb(wsDateReformatAreas.getWsStartDate(), wsDateReformatAreas.getWsCurrentDate());
+            c1parkanbStream.forEach(item -> {
 
+                // wsSwitches.suppNotFound;
+                // wsSwitches.ordMtdNotFound;
+            	
 
-wsSwitches.suppNotFound;wsSwitches.ordMtdNotFound;m2205LookForSupplier(item.getHvPmCustomerSupp());
-hvPmCustomerSuppexit();
-m2207LookForOrdMetd(item.getHvPmOrderMethod());
-if(wsSwitches.getWsSuppFound().equals(wsSwitches.getSuppNotFound())&&wsSwitches.getWsOrdMtdFound().equals(wsSwitches.getOrdMtdNotFound()) )
- { 
- m2210MoveReformat(item.getHvPmItemid(),item.getHvPmKanban(),item.getHvPmEmployee(),item.getHvPmLocation(),item.getHvPmCustomerSupp(),item.getHvPmLotQuantity());
+                m2205LookForSupplier(item.getHvPmCustomerSupp());
+                // hvPmCustomerSuppexit();
+                m2207LookForOrdMetd(item.getHvPmOrderMethod());
+                if (wsSwitches.getSuppFound().equals(wsSwitches.getSuppNotFound())
+                        && wsSwitches.getOrdMtdFound().equals(wsSwitches.getOrdMtdNotFound())) {
+                    m2210MoveReformat(item.getHvPmItemid(), item.getHvPmKanban(), item.getHvPmEmployee(),
+                            item.getHvPmLocation(), item.getHvPmCustomerSupp(), item.getHvPmLotQuantity());
 
- } 
-	 
- }; 
-}catch(Exception e){
- log.error(e); 
- } 
- 
-  wsSwitches.setWsParkanbSwitch("N");
-  
-log.debug("Method m2200MainProcessLoop completed..");
- }
+                }
 
- public void m2205LookForSupplier(String hvPmCustomerSupp){
- log.debug("Methodm2205LookForSupplierstarted..");
-=hostVariablesPm.getHvPmCustomerSupp().substring(0,5);if(validSuppCode.contains(t1SuppCode) )
- { 
- wsSwitches.suppFound;inlinElOopMethod();
+            });
+        } catch (Exception e) {
+            log.error(e);
+        }
 
- } 
+        wsSwitches.setWsParkanbSwitch("N");
 
-  
+        log.debug("Method m2200MainProcessLoop completed..");
+    }
 
- 
- 
-   
-log.debug("Method m2205LookForSupplier completed..");
- }
+    public void LookForSupplier(String hvPmCustomerSupp) {
+        log.debug("Methodm2205LookForSupplierstarted..");
+       // hvPmCustomerSupp.substring(0, 5); // Commented as it is not used
+        if (validSuppCode.contains(t1SuppCode)) {
+            // wsSwitches.suppFound;
+            // inlinElOopMethod();
 
- public void m2207LookForOrdMetd(String hvPmOrderMethod){
- log.debug("Methodm2207LookForOrdMetdstarted..");
-t2OrderMethod= hostVariablesPm.getHvPmOrderMethod();
-     
-      if(validOrderMethod.contains(t2OrderMethod) )
- { 
- wsSwitches.ordMtdFound;
- } 
+        }
 
-  
- 
-  
-log.debug("Method m2207LookForOrdMetd completed..");
- }
+        log.debug("Method m2205LookForSupplier completed..");
+    }
 
- public void m2210MoveReformat(String hvPmItemid,String hvPmKanban,String hvPmEmployee,String hvPmLocation,String hvPmCustomerSupp,int  hvPmLotQuantity){
- log.debug("Methodm2210MoveReformatstarted..");
-V01Rec.setV01Rec("");
-     
+    public void LookForOrdMetd(String hvPmOrderMethod) {
+        log.debug("Methodm2207LookForOrdMetdstarted..");
+        t2OrderMethod = hostVariablesPm.getHvPmOrderMethod();
 
-      V01Rec.setV01OwkPartNum(hostVariablesPm.getHvPmItemid());V01Rec.setV01OwkKanbanNum(hostVariablesPm.getHvPmKanban());V01Rec.setV01OwkOrdSpecialist(hostVariablesPm.getHvPmEmployee().substring(0,2));v01OwkBeDock = StringUtils.replace(v01OwkBeDock, v01OwkBeDock.substring(-1,-1), hvPmLocation.substring(0,2));v01OwkSupPlantCode = StringUtils.replace(v01OwkSupPlantCode, v01OwkSupPlantCode.substring(-1,-1), hvPmCustomerSupp.substring(2,7));V01Rec.v01OwkOrdRelDt=v02Datetime.toFixedWidthString();=hostVariablesPm.getHvPmLotQuantity().substring(0,7);V01Rec.setV01OwkQtyPerBox(wsQtyPerBox);m2212CsiplntRead(item.getHvPmCustomerSupp());
+        if (validOrderMethod.contains(t2OrderMethod)) {
+            // wsSwitches.ordMtdFound;
+        }
 
-         m2215ProcessPardesc(item.getHvPmItemid());
+        log.debug("Method m2207LookForOrdMetd completed..");
+    }
 
-         m2218ProcessParkanbCl(item.getHvPmItemid(),item.getHvPmLocation(),item.getHvPmCustomerSupp(),item.getHvPmKanban());
-m8000WritePartmstr();
+    public void MoveReformat(String hvPmItemid, String hvPmKanban, String hvPmEmployee, String hvPmLocation,
+            String hvPmCustomerSupp, int hvPmLotQuantity) {
+        log.debug("Methodm2210MoveReformatstarted..");
+        // v01Rec.setV01Rec("");
 
-           
- 
-  
-log.debug("Method m2210MoveReformat completed..");
- }
+        v01Rec.setV01OwkPartNum(hostVariablesPm.getHvPmItemid());
+        v01Rec.setV01OwkKanbanNum(hostVariablesPm.getHvPmKanban());
+        v01Rec.setV01OwkOrdSpecialist(hostVariablesPm.getHvPmEmployee().substring(0, 2));
+        // v01OwkBeDock = StringUtils.replace(v01OwkBeDock, v01OwkBeDock.substring(-1,-1), hvPmLocation.substring(0,2));
+        v01Rec.setV01OwkBeDock(StringUtils.replace(v01Rec.getV01OwkBeDock(), v01Rec.getV01OwkBeDock().substring(-1, -1),hvPmLocation.substring(0, 2)));
+        // v01OwkSupPlantCode = StringUtils.replace(v01OwkSupPlantCode,
+        // v01OwkSupPlantCode.substring(-1,-1), hvPmCustomerSupp.substring(2,7));
+        v01Rec.setV01OwkSupPlantCode(StringUtils.replace(v01Rec.getV01OwkSupPlantCode(),
+                v01Rec.getV01OwkSupPlantCode().substring(-1, -1), hvPmCustomerSupp.substring(2, 7)));
+        v01Rec.setV01OwkOrdRelDt(v02Datetime.toFixedWidthString());
+
+        String.valueOf(hostVariablesPm.getHvPmLotQuantity()).substring(0, 7);
+
+        v01Rec.setV01OwkQtyPerBox(String.valueOf(wsQtyPerBox));
+
+        m2212CsiplntRead(hvPmCustomerSupp);
+
+        m2215ProcessPardesc(hvPmItemid);
+
+        m2218ProcessParkanbCl(hvPmItemid, hvPmLocation, hvPmCustomerSupp, hvPmKanban);
+
+        m2218ProcessParkanbCl(hostVariablesPm.getHvPmItemid(), hostVariablesPm.getHvPmLocation(),
+                hostVariablesPm.getHvPmCustomerSupp(), hostVariablesPm.getHvPmKanban());
+        m8000WritePartmstr();
+
+        log.debug("Method m2210MoveReformat completed..");
+    }
 
     @Transactional(readOnly = true)
     public void m2212CsiplntRead(String hvPmCustomerSupp) {
@@ -270,9 +312,9 @@ log.debug("Method m2210MoveReformat completed..");
             List<IM2212csiplntJpaDto> selectCSIPLNTlist = csiplntJpa.selectcsiplnt(hvPmCustomerSupp);
             if (selectCSIPLNTlist != null) {
 
-                v01OwkSupPlantName = StringUtils.replace(v01OwkSupPlantName, v01OwkSupPlantName.substring(-1, -1),
-                        hvSmSuppPlantName.substring(0, 30));
-                if (hostVariablesPm.hvSuppPlantCnt > 1) {
+                v01Rec.setV01OwkSupPlantName(StringUtils.replace(v01Rec.getV01OwkSupPlantName(),
+                        v01Rec.getV01OwkSupPlantName().substring(-1, -1), hvSmSuppPlantName.substring(0, 30)));
+                if (hostVariablesPm.getHvSuppPlantCnt() > 1) {
                     v03ErrorMessage = "MULTIPLE SUPPLIER PLANT NAME";
                 }
 
@@ -282,7 +324,7 @@ log.debug("Method m2210MoveReformat completed..");
             log.error(e);
         }
 
-        V01Rec.setV01OwkSupPlantName("NO DATA");
+        v01Rec.setV01OwkSupPlantName("NO DATA");
         v03ErrorMessage = "NO SUPPLIER PLANT NAME";
 
         log.debug("Method m2212CsiplntRead completed..");
@@ -297,9 +339,9 @@ log.debug("Method m2210MoveReformat completed..");
             List<IM2215pardescJpaDto> selectPARDESClist = pardescJpa.selectpardesc(hvPmItemid);
             if (selectPARDESClist != null) {
 
-                v01OwkPartDesc = StringUtils.replace(v01OwkPartDesc, v01OwkPartDesc.substring(-1, -1),
-                        hvSmPartDescription.substring(0, 30));
-                if (hostVariablesPm.hvPartDescriptionCnt > 1) {
+                v01Rec.setV01OwkPartDesc(StringUtils.replace(v01Rec.getV01OwkPartDesc(),
+                        v01Rec.getV01OwkPartDesc().substring(-1, -1), hvSmPartDescription.substring(0, 30)));
+                if (hostVariablesPm.getHvPartDescriptionCnt() > 1) {
                     v03ErrorMessage = "MULTIPLE PART DESCRIPTION";
                 }
 
@@ -309,38 +351,43 @@ log.debug("Method m2210MoveReformat completed..");
             log.error(e);
         }
 
-        V01Rec.setV01OwkPartDesc("NO DATA");
+        v01Rec.setV01OwkPartDesc("NO DATA");
         v03ErrorMessage = "NO PART DESCRIPTION";
 
         log.debug("Method m2215ProcessPardesc completed..");
     }
 
-  @Transactional(readOnly = true)  
- public void m2218ProcessParkanbCl(String hvPmItemid,String hvPmLocation,String hvPmCustomerSupp,String hvPmKanban){
- log.debug("Methodm2218ProcessParkanbClstarted..");
-wsPartNumber= hostVariablesPm.getHvPmItemid();wsDock = StringUtils.replace(wsDock, wsDock.substring(-1,-1), hvPmLocation.substring(0,2));wsCustomerSupp= hostVariablesPm.getHvPmCustomerSupp();wsKanban= hostVariablesPm.getHvPmKanban();hvPkLocation="";
-hvPkStoreAddrPrim="";
-      
+    @Transactional(readOnly = true)
+    public void m2218ProcessParkanbCl(String hvPmItemid, String hvPmLocation, String hvPmCustomerSupp,
+            String hvPmKanban) {
+        log.debug("Methodm2218ProcessParkanbClstarted..");
+        wsPartNumber = hostVariablesPm.getHvPmItemid();
+        wsDock = StringUtils.replace(wsDock, wsDock.substring(-1, -1), hvPmLocation.substring(0, 2));
+        wsCustomerSupp = hostVariablesPm.getHvPmCustomerSupp();
+        wsKanban = hostVariablesPm.getHvPmKanban();
+        hvPkLocation = "";
+        hvPkStoreAddrPrim = "";
 
-     
-       try { 
- Stream<Ic2ParkanbJpaDto>  c2parkanbStream = c2parkanbjpa.selectc2Parkanb(wsPartNumber,wsCustomerSupp,wsDock,wsStartDate,wsCurrentDate);c2parkanbStream.forEach(item -> {
-  
+        try {
+            Stream<Ic2ParkanbJpaDto> c2parkanbStream = c2ParkanbJpa.selectc2Parkanb(wsPartNumber, wsCustomerSupp,
+                    wsDock, wsDateReformatAreas.getWsStartDate(), wsDateReformatAreas.getWsCurrentDate());
 
+            c2parkanbStream.forEach(item -> {
 
-v01OwkLinesideAddress = StringUtils.replace(v01OwkLinesideAddress, v01OwkLinesideAddress.substring(-1,-1), hvPkLocation.substring(2,12));V01Rec.setV01OwkStoreAddress(hvPkStoreAddrPrim);	 
- }; 
-}catch(Exception e){
- log.error(e); 
- } 
- 
-  V01Rec.setV01OwkLinesideAddress("NO DATA");V01Rec.setV01OwkStoreAddress("NO DATA");V01Rec.setV01OwkNamcData("");
-      
-       
+                // v01OwkLinesideAddress = StringUtils.replace(v01OwkLinesideAddress,
+                // v01OwkLinesideAddress.substring(-1,-1),
+                // hvPkLocation.substring(2,12));V01Rec.setV01OwkStoreAddress(hvPkStoreAddrPrim);
+            });
+        } catch (Exception e) {
+            log.error(e);
+        }
 
-  
-log.debug("Method m2218ProcessParkanbCl completed..");
- }
+        v01Rec.setV01OwkLinesideAddress("NO DATA");
+        v01Rec.setV01OwkStoreAddress("NO DATA");
+        v01Rec.setV01OwkNamcData("");
+
+        log.debug("Method m2218ProcessParkanbCl completed..");
+    }
 
     public void m3000CloseFiles() {
         log.debug("Methodm3000CloseFilesstarted..");
@@ -353,7 +400,7 @@ log.debug("Method m2218ProcessParkanbCl completed..");
 
     public void m8000WritePartmstr() {
         log.debug("Methodm8000WritePartmstrstarted..");
-        streamBridge.send(0, recOut01);
+        // streamBridge.send(0, recOut01);
 
         log.debug("Method m8000WritePartmstr completed..");
     }

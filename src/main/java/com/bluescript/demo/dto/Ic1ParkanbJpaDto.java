@@ -20,4 +20,6 @@ public interface Ic1ParkanbJpaDto {
     public String getHvPmEffStart();
 
     public String getHvPmOrderMethod();
+    
+    
 }

@@ -12,9 +12,10 @@ import org.springframework.data.jpa.repository.QueryHints;
 import com.bluescript.demo.dto.Ic2ParkanbJpaDto;
 import com.bluescript.demo.entity.ParkanbEntity;
 
-public interface Ic2ParkanbJpa extends Repository<ParkanbEntity, ID> {
+public interface Ic2ParkanbJpa extends Repository<ParkanbEntity, String> {
     @QueryHints(value = { @QueryHint(name = org.hibernate.annotations.QueryHints.FETCH_SIZE, value = "100"), // modify
-                                                                                                             // based on
+                                                                                                             // based
+                                                                                                             // on
                                                                                                              // performance
             @QueryHint(name = org.hibernate.annotations.QueryHints.CACHEABLE, value = "false"),
             @QueryHint(name = org.hibernate.annotations.QueryHints.READ_ONLY, value = "true") })
