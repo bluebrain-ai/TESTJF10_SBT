@@ -29,12 +29,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalTime;
 
 import com.bluescript.demo.dto.c1ParkanbJpaDto;
-import com.bluescript.demo.dto.ParkanbJpaDto;
 import com.bluescript.demo.dto.M2212csiplntJpaDto;
-import com.bluescript.demo.dto.CsiplntJpaDto;
+import com.bluescript.demo.dto.M2215pardescJpaDto;
+import com.bluescript.demo.dto.IM2212csiplntJpaDto;
 import com.bluescript.demo.jpa.IM2212csiplntJpa;
-import com.bluescript.demo.dto.PardescJpaDto;
 import com.bluescript.demo.dto.IM2215pardescJpaDto;
+import com.bluescript.demo.dto.Ic1ParkanbJpaDto;
 import com.bluescript.demo.jpa.IM2215pardescJpa;
 import com.bluescript.demo.dto.c2ParkanbJpaDto;
 import com.bluescript.demo.dto.Ic2ParkanbJpaDto;
@@ -86,7 +86,7 @@ public class Testjf10 {
     @Autowired
     private IM2212csiplntJpa csiplntJpa;
     @Autowired
-    private PardescJpaDto m2215PardescJpaDto;
+    private M2215pardescJpaDto m2215PardescJpaDto;
     @Autowired
     private IM2215pardescJpa pardescJpa;
     @Autowired
@@ -219,7 +219,7 @@ public class Testjf10 {
     public void mainProcessLoop() {
         log.debug("Methodm2200MainProcessLoopstarted..");
         try {
-            Stream<ParkanbJpaDto> c1parkanbStream = c1ParkanbJpa
+            Stream<Ic1ParkanbJpaDto> c1parkanbStream = c1ParkanbJpa
                     .selectc1Parkanb(wsDateReformatAreas.getWsStartDate(), wsDateReformatAreas.getWsCurrentDate());
             c1parkanbStream.forEach(item -> {
 
@@ -309,7 +309,7 @@ public class Testjf10 {
 
         // Singleton
         try {
-            List<CsiplntJpaDto> selectCSIPLNTlist = csiplntJpa.selectcsiplnt(hvPmCustomerSupp);
+            List<IM2212csiplntJpaDto> selectCSIPLNTlist = csiplntJpa.selectcsiplnt(hvPmCustomerSupp);
             if (selectCSIPLNTlist != null) {
 
                 v01Rec.setV01OwkSupPlantName(StringUtils.replace(v01Rec.getV01OwkSupPlantName(),
