@@ -29,11 +29,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalTime;
 
 import com.bluescript.demo.dto.c1ParkanbJpaDto;
-import com.bluescript.demo.dto.Ic1ParkanbJpaDto;
+import com.bluescript.demo.dto.ParkanbJpaDto;
 import com.bluescript.demo.dto.M2212csiplntJpaDto;
-import com.bluescript.demo.dto.IM2212csiplntJpaDto;
+import com.bluescript.demo.dto.CsiplntJpaDto;
 import com.bluescript.demo.jpa.IM2212csiplntJpa;
-import com.bluescript.demo.dto.M2215pardescJpaDto;
+import com.bluescript.demo.dto.PardescJpaDto;
 import com.bluescript.demo.dto.IM2215pardescJpaDto;
 import com.bluescript.demo.jpa.IM2215pardescJpa;
 import com.bluescript.demo.dto.c2ParkanbJpaDto;
@@ -86,7 +86,7 @@ public class Testjf10 {
     @Autowired
     private IM2212csiplntJpa csiplntJpa;
     @Autowired
-    private M2215pardescJpaDto m2215PardescJpaDto;
+    private PardescJpaDto m2215PardescJpaDto;
     @Autowired
     private IM2215pardescJpa pardescJpa;
     @Autowired
@@ -122,21 +122,21 @@ public class Testjf10 {
     private ConvStrToObj copyStrToObj;
 
     @Transactional(readOnly = true)
-    public void m0000MainModule() {
+    public void mainModule() {
         log.debug("Methodm0000MainModulestarted..");
         log.info("OWKB010 START");
 
-        m1000Initialization();
+        initialization();
 
-        m2000Mainline();
-        m2000MainlineExit();
+        mainline();
+        mainlineExit();
 
-        m3000CloseFiles();
+        closeFiles();
 
         log.debug("Method m0000MainModule completed..");
     }
 
-    public void m1000Initialization() {
+    public void initialization() {
         log.debug("Methodm1000Initializationstarted....");
         wsDateReformatAreas.setWsTodayDate(LocalDate.now().format(DateTimeFormatter.ofPattern("YYYYMMdd"))); // --
                                                                                                              // Formatter
@@ -190,7 +190,7 @@ public class Testjf10 {
     }
 
     @Transactional(readOnly = true)
-    public void m2000Mainline() {
+    public void mainline() {
         log.debug("Methodm2000Mainlinestarted..");
         v01Rec.setV01OwkBusinessEntity("BK005");
         v04OwkBusEnt = "BK005";
@@ -202,24 +202,24 @@ public class Testjf10 {
         // m2100OpenC1Parkanb();
 
         while (wsSwitches.getWsParkanbSwitch().equals("Y")) { // changed the equals method to intial noPerk -- revathi
-            m2200MainProcessLoop();
+            mainProcessLoop();
         }
         ;
 
         log.debug("Method m2000Mainline completed..");
     }
 
-    public void m2000MainlineExit() {
+    public void mainlineExit() {
         log.debug("Methodm2000MainlineExitstarted..");
 
         log.debug("Method m2000MainlineExit completed..");
     }
 
     @Transactional(readOnly = true)
-    public void m2200MainProcessLoop() {
+    public void mainProcessLoop() {
         log.debug("Methodm2200MainProcessLoopstarted..");
         try {
-            Stream<Ic1ParkanbJpaDto> c1parkanbStream = c1ParkanbJpa
+            Stream<ParkanbJpaDto> c1parkanbStream = c1ParkanbJpa
                     .selectc1Parkanb(wsDateReformatAreas.getWsStartDate(), wsDateReformatAreas.getWsCurrentDate());
             c1parkanbStream.forEach(item -> {
 
@@ -227,12 +227,12 @@ public class Testjf10 {
                 // wsSwitches.ordMtdNotFound;
             	
 
-                m2205LookForSupplier(item.getHvPmCustomerSupp());
+                lookForSupplier(item.getHvPmCustomerSupp());
                 // hvPmCustomerSuppexit();
-                m2207LookForOrdMetd(item.getHvPmOrderMethod());
+                lookForOrdMetd(item.getHvPmOrderMethod());
                 if (wsSwitches.getSuppFound().equals(wsSwitches.getSuppNotFound())
                         && wsSwitches.getOrdMtdFound().equals(wsSwitches.getOrdMtdNotFound())) {
-                    m2210MoveReformat(item.getHvPmItemid(), item.getHvPmKanban(), item.getHvPmEmployee(),
+                    moveReformat(item.getHvPmItemid(), item.getHvPmKanban(), item.getHvPmEmployee(),
                             item.getHvPmLocation(), item.getHvPmCustomerSupp(), item.getHvPmLotQuantity());
 
                 }
@@ -247,7 +247,7 @@ public class Testjf10 {
         log.debug("Method m2200MainProcessLoop completed..");
     }
 
-    public void LookForSupplier(String hvPmCustomerSupp) {
+    public void lookForSupplier(String hvPmCustomerSupp) {
         log.debug("Methodm2205LookForSupplierstarted..");
        // hvPmCustomerSupp.substring(0, 5); // Commented as it is not used
         if (validSuppCode.contains(t1SuppCode)) {
@@ -259,7 +259,7 @@ public class Testjf10 {
         log.debug("Method m2205LookForSupplier completed..");
     }
 
-    public void LookForOrdMetd(String hvPmOrderMethod) {
+    public void lookForOrdMetd(String hvPmOrderMethod) {
         log.debug("Methodm2207LookForOrdMetdstarted..");
         t2OrderMethod = hostVariablesPm.getHvPmOrderMethod();
 
@@ -270,7 +270,7 @@ public class Testjf10 {
         log.debug("Method m2207LookForOrdMetd completed..");
     }
 
-    public void MoveReformat(String hvPmItemid, String hvPmKanban, String hvPmEmployee, String hvPmLocation,
+    public void moveReformat(String hvPmItemid, String hvPmKanban, String hvPmEmployee, String hvPmLocation,
             String hvPmCustomerSupp, int hvPmLotQuantity) {
         log.debug("Methodm2210MoveReformatstarted..");
         // v01Rec.setV01Rec("");
@@ -290,26 +290,26 @@ public class Testjf10 {
 
         v01Rec.setV01OwkQtyPerBox(String.valueOf(wsQtyPerBox));
 
-        m2212CsiplntRead(hvPmCustomerSupp);
+        csiplntRead(hvPmCustomerSupp);
 
-        m2215ProcessPardesc(hvPmItemid);
+        processPardesc(hvPmItemid);
 
-        m2218ProcessParkanbCl(hvPmItemid, hvPmLocation, hvPmCustomerSupp, hvPmKanban);
+        processParkanbCl(hvPmItemid, hvPmLocation, hvPmCustomerSupp, hvPmKanban);
 
-        m2218ProcessParkanbCl(hostVariablesPm.getHvPmItemid(), hostVariablesPm.getHvPmLocation(),
+        processParkanbCl(hostVariablesPm.getHvPmItemid(), hostVariablesPm.getHvPmLocation(),
                 hostVariablesPm.getHvPmCustomerSupp(), hostVariablesPm.getHvPmKanban());
-        m8000WritePartmstr();
+        writePartmstr();
 
         log.debug("Method m2210MoveReformat completed..");
     }
 
     @Transactional(readOnly = true)
-    public void m2212CsiplntRead(String hvPmCustomerSupp) {
+    public void csiplntRead(String hvPmCustomerSupp) {
         log.debug("Methodm2212CsiplntReadstarted..");
 
         // Singleton
         try {
-            List<IM2212csiplntJpaDto> selectCSIPLNTlist = csiplntJpa.selectcsiplnt(hvPmCustomerSupp);
+            List<CsiplntJpaDto> selectCSIPLNTlist = csiplntJpa.selectcsiplnt(hvPmCustomerSupp);
             if (selectCSIPLNTlist != null) {
 
                 v01Rec.setV01OwkSupPlantName(StringUtils.replace(v01Rec.getV01OwkSupPlantName(),
@@ -331,7 +331,7 @@ public class Testjf10 {
     }
 
     @Transactional(readOnly = true)
-    public void m2215ProcessPardesc(String hvPmItemid) {
+    public void processPardesc(String hvPmItemid) {
         log.debug("Methodm2215ProcessPardescstarted..");
 
         // Singleton
@@ -358,7 +358,7 @@ public class Testjf10 {
     }
 
     @Transactional(readOnly = true)
-    public void m2218ProcessParkanbCl(String hvPmItemid, String hvPmLocation, String hvPmCustomerSupp,
+    public void processParkanbCl(String hvPmItemid, String hvPmLocation, String hvPmCustomerSupp,
             String hvPmKanban) {
         log.debug("Methodm2218ProcessParkanbClstarted..");
         wsPartNumber = hostVariablesPm.getHvPmItemid();
@@ -389,7 +389,7 @@ public class Testjf10 {
         log.debug("Method m2218ProcessParkanbCl completed..");
     }
 
-    public void m3000CloseFiles() {
+    public void closeFiles() {
         log.debug("Methodm3000CloseFilesstarted..");
         wsOut01DisplayCount = wsOut01Counter;
 
@@ -398,7 +398,7 @@ public class Testjf10 {
         log.debug("Method m3000CloseFiles completed..");
     }
 
-    public void m8000WritePartmstr() {
+    public void writePartmstr() {
         log.debug("Methodm8000WritePartmstrstarted..");
         // streamBridge.send(0, recOut01);
 

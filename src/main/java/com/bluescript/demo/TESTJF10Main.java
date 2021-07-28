@@ -16,7 +16,7 @@ public class TESTJF10Main {
         // scan.nextLine();
 
         Testjf10 testj10 = context.getBean(Testjf10.class);
-        testj10.m0000MainModule();
+        testj10.mainModule();
 
     }
 
